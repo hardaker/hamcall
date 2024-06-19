@@ -10,6 +10,10 @@ dynamic = ["version"]
 requires-python = ">=3.10"
 description  = "A amateur radio callsign lookup database (currently US FCC only)"
 readme="README.md"
+author="Wes Hardaker"
+
+[project.license]
+file = "LICENSE.txt"
 
 [project.urls]
 Homepage = "https://github.com/hardaker/hamcall"
