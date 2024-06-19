@@ -5,6 +5,7 @@ from logging import debug, info, warning, error, critical
 import logging
 import sys
 import sqlite3
+import json
 from pathlib import Path
 
 # optionally use rich
@@ -22,6 +23,23 @@ try:
 except Exception:
     pass
 
+default_fields = {
+    "unique_system_identifier": "Id",
+    "callsign": "Callsign",
+    "operator_class": "Class",
+    "previous_callsign": "Previously",
+    "last_name": "Last name",
+    "first_name": "First name",
+#    "grant_date": "Granted",
+#    "expired_date": "Expires",
+#    "cancellation_date": "Canceled",
+    "street_address": "Address",
+    "po_box": "PO Box",
+    "city": "City",
+    "state": "State",
+    "zip_code": "Zip code",
+}
+
 def parse_args():
     "Parse the command line arguments."
     parser = ArgumentParser(formatter_class=help_handler,
@@ -38,16 +56,21 @@ def parse_args():
     parser.add_argument("-l", "--load", default=None, type=str,
                         help="Load this directory of files into the database")
 
+    parser.add_argument("-f", "--display_fields", default=default_fields,
+                        type=list[str], help="List of DB fields to show")
+
+    parser.add_argument("-a", "--all-fields", action="store_true",
+                        help="Just dump all fields")
+
+    parser.add_argument("-j", "--json", action="store_true",
+                        help="Dump all found records in JSON format")
+
     parser.add_argument("--log-level", "--ll", default="info",
                         help="Define the logging verbosity level (debug, info, warning, error, fotal, critical).")
 
-    parser.add_argument("input_file", type=FileType('r'),
-                        nargs='?', default=sys.stdin,
-                        help="")
-
-    parser.add_argument("output_file", type=FileType('w'),
-                        nargs='?', default=sys.stdout,
-                        help="")
+    parser.add_argument("callsigns", type=str,
+                        nargs='*',
+                        help="Amateur radio callsigns to look up")
 
     args = parser.parse_args()
     log_level = args.log_level.upper()
@@ -212,6 +235,55 @@ def load_db(args):
     load_file_into_table(db, dir.joinpath("HD.dat"), "HD", 59)
     db.commit()
 
+def row_to_dict(cursor, row):
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d
+
+def display_callsign(args, result):
+    if args.json:
+        print(json.dumps(result))
+        return
+
+    if args.all_fields:
+        args.display_fields = {x:x for x in result.keys()}
+
+    print(f"{result['callsign']}:")
+    for field in args.display_fields:
+        if result[field] != "":
+            label = args.display_fields[field]
+            print(f"  {label:<20}: {result[field]}")
+
+def lookup_callsigns(args):
+    db = get_db(args)
+    for callsign in args.callsigns:
+
+        # fetch the amateur record
+        cursor = db.execute("select * from PUBACC_AM where callsign = ?",
+                            [callsign.upper()])
+        cursor.row_factory = row_to_dict
+        results = cursor.fetchall()
+
+        # for each result, also fetch additional data from the other databases:
+        for result in results:
+            id = result['unique_system_identifier']
+
+            en_handle = db.execute("select * from PUBACC_EN where unique_system_identifier = ?", [id])
+            en_handle.row_factory = row_to_dict
+            additionals = en_handle.fetchall()
+            for additional in additionals:
+                result.update(additional)
+
+            en_handle = db.execute("select * from PUBACC_HD where unique_system_identifier = ?", [id])
+            en_handle.row_factory = row_to_dict
+            additionals = en_handle.fetchall()
+            for additional in additionals:
+                result.update(additional)
+
+        for result in results:
+            display_callsign(args, result)
+
 def main():
     args = parse_args()
 
@@ -221,7 +293,9 @@ def main():
 
     if args.load:
         load_db(args)
+        return
         
+    lookup_callsigns(args)
 
 if __name__ == "__main__":
     main()
