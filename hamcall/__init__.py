@@ -61,18 +61,22 @@ def parse_args() -> Namespace:
     )
 
     parser.add_argument(
-        "-i",
+        "-I",
         "--init",
         action="store_true",
         help="Create the database structure.",
     )
 
     parser.add_argument(
-        "-l",
+        "-L",
         "--load",
         default=None,
         type=str,
         help="Load this directory of files into the database",
+    )
+
+    parser.add_argument(
+        "-l", "--last_name", action="store_true", help="Search by last name instead"
     )
 
     parser.add_argument(
@@ -318,12 +322,25 @@ def display_callsign(args, result):
 
 def lookup_callsigns(args):
     db = get_db(args)
+
+    search_expression = "select * from PUBACC_AM where callsign = ?"
+    merge_tables = ["EN", "HD"]
+    if args.last_name:
+        search_expression = "select * from PUBACC_EN where last_name = ?"
+        merge_tables = ["AM", "HD"]
+
     for callsign in args.callsigns:
         # fetch the amateur record
-        debug(f"searching for callsign {callsign}")
+        debug(f"searching for {callsign}")
+
+        if args.last_name:
+            callsign = callsign.capitalize()
+        else:
+            callsign = callsign.upper()
+
         cursor = db.execute(
-            "select * from PUBACC_AM where callsign = ?",
-            [callsign.upper()],
+            search_expression,
+            [callsign],
         )
         cursor.row_factory = row_to_dict
         results = cursor.fetchall()
@@ -332,23 +349,16 @@ def lookup_callsigns(args):
         for result in results:
             id = result["unique_system_identifier"]
 
-            en_handle = db.execute(
-                "select * from PUBACC_EN where unique_system_identifier = ?",
-                [id],
-            )
-            en_handle.row_factory = row_to_dict
-            additionals = en_handle.fetchall()
-            for additional in additionals:
-                result.update(additional)
-
-            en_handle = db.execute(
-                "select * from PUBACC_HD where unique_system_identifier = ?",
-                [id],
-            )
-            en_handle.row_factory = row_to_dict
-            additionals = en_handle.fetchall()
-            for additional in additionals:
-                result.update(additional)
+            # this could be done as an sql join, but there are conflicting columns ... eh
+            for table in merge_tables:
+                handle = db.execute(
+                    f"select * from PUBACC_{table} where unique_system_identifier = ?",
+                    [id],
+                )
+                handle.row_factory = row_to_dict
+                additionals = handle.fetchall()
+                for additional in additionals:
+                    result.update(additional)
 
         for result in results:
             display_callsign(args, result)
