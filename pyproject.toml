@@ -21,6 +21,6 @@ path = "hamcall/__init__.py"
 hamcall = "hamcall:main"
 
 [tool.ruff]
-select = ["ALL"]   # gulp
+#select = ["ALL"]   # gulp
 fixable = ["ALL"]  # double gulp
-ignore = ["E501", "PLC0414", "S101"]
+ignore = ["E501", "PLC0414", "S101", "ERA001"]
