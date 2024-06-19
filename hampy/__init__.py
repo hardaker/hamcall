@@ -36,7 +36,7 @@ def parse_args():
                         help="Create the database structure.")
 
     parser.add_argument("-l", "--load", default=None, type=str,
-                        help="Load this file into the database")
+                        help="Load this directory of files into the database")
 
     parser.add_argument("--log-level", "--ll", default="info",
                         help="Define the logging verbosity level (debug, info, warning, error, fotal, critical).")
@@ -201,13 +201,15 @@ def load_file_into_table(db, filename: str, table: str, columns: int):
             pieces = line.strip().split("|")
             db.execute(f"insert into PUBACC_{table} values({values})", pieces)
             if n % 10000 == 0:
-                print(f"table {table}: {n}")
+                print(f"loading table {table}: {n}")
     db.commit()
 
 def load_db(args):
     db = get_db(args)
-    load_file_into_table(db, args.load, "AM", 18)
-    load_file_into_table(db, args.load, "AM", 18)
+    dir = Path(args.load)
+    load_file_into_table(db, dir.joinpath("AM.dat"), "AM", 18)
+    load_file_into_table(db, dir.joinpath("EN.dat"), "EN", 30)
+    load_file_into_table(db, dir.joinpath("HD.dat"), "HD", 59)
     db.commit()
 
 def main():
