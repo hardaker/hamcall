@@ -23,4 +23,4 @@ hamcall = "hamcall:main"
 [tool.ruff]
 select = ["ALL"]   # gulp
 fixable = ["ALL"]  # double gulp
-ignore = ["E501"]  # long lines
+ignore = ["E501", "PLC0414", "S101"]
