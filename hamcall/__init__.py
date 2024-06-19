@@ -8,6 +8,8 @@ import sqlite3
 import json
 from pathlib import Path
 
+__VERSION__ = "0.1"
+
 # optionally use rich
 try:
     from rich import print
