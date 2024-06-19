@@ -1,0 +1,26 @@
+[tool.hatch]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hamcall"
+dynamic = ["version"]
+requires-python = ">=3.10"
+description  = "A amateur radio callsign lookup database (currently US FCC only)"
+readme="README.md"
+
+[project.urls]
+Homepage = "https://github.com/hardaker/hamcall"
+
+[tool.hatch.version]
+path = "hamcall/__init__.py"
+
+[project.scripts]
+hamcall = "hamcall:main"
+
+[tool.ruff]
+select = ["ALL"]   # gulp
+fixable = ["ALL"]  # double gulp
+ignore = ["E501"]  # long lines
