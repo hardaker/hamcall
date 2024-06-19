@@ -28,3 +28,8 @@ hamcall = "hamcall:main"
 #select = ["ALL"]   # gulp
 fixable = ["ALL"]  # double gulp
 ignore = ["E501", "PLC0414", "S101", "ERA001"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/hamcall",
+]
