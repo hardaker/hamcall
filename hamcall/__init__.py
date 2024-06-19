@@ -1,6 +1,6 @@
 """Create and access a local FCC ULS database of ham callsigns"""
 
-from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter, FileType
+from argparse import ArgumentParser, ArgumentDefaultsHelpFormatter
 from logging import debug, info, warning, error, critical
 import logging
 import sys
@@ -224,7 +224,7 @@ def load_file_into_table(db, filename: str, table: str, columns: int):
             pieces = line.strip().split("|")
             db.execute(f"insert into PUBACC_{table} values({values})", pieces)
             if n % 10000 == 0:
-                print(f"loading table {table}: {n}")
+                info(f"loading table {table}: {n}")
     db.commit()
 
 def load_db(args):
@@ -260,6 +260,7 @@ def lookup_callsigns(args):
     for callsign in args.callsigns:
 
         # fetch the amateur record
+        debug(f"searching for callsign {callsign}")
         cursor = db.execute("select * from PUBACC_AM where callsign = ?",
                             [callsign.upper()])
         cursor.row_factory = row_to_dict
