@@ -11,6 +11,12 @@ requires-python = ">=3.10"
 description  = "A amateur radio callsign lookup database (currently US FCC only)"
 readme="README.md"
 author="Wes Hardaker"
+dependencies= [
+    "sqlite3",
+    "rich",
+    "rich-argparse",
+    "rich-logging"
+]
 
 [project.license]
 file = "LICENSE.txt"
