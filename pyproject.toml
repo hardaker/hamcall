@@ -12,7 +12,6 @@ description  = "A amateur radio callsign lookup database (currently US FCC only)
 readme="README.md"
 author="Wes Hardaker"
 dependencies= [
-    "sqlite3",
     "rich",
     "rich-argparse",
     "rich-logging"
