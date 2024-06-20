@@ -55,7 +55,7 @@ def parse_args() -> Namespace:
     parser.add_argument(
         "-d",
         "--database",
-        default=Path.home() / ".hampy.db",
+        default=Path.home() / ".hamcall.sqlite3",
         type=str,
         help="Where to store the database",
     )
