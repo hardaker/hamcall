@@ -320,20 +320,22 @@ def display_callsign(args, result):
             print(f"  {label:<20}: {result[field]}")
 
 
-def lookup_callsigns(args) -> list[dict]:
-    db = get_db(args.database)
+def lookup_callsigns(
+    database_path: str, callsigns: list[str], by_last_name: bool = False
+) -> list[dict]:
+    db = get_db(database_path)
 
     search_expression = "select * from PUBACC_AM where callsign = ?"
     merge_tables = ["EN", "HD"]
-    if args.last_name:
+    if by_last_name:
         search_expression = "select * from PUBACC_EN where last_name = ?"
         merge_tables = ["AM", "HD"]
 
-    for callsign in args.callsigns:
+    for callsign in callsigns:
         # fetch the amateur record
         debug(f"searching for {callsign}")
 
-        if args.last_name:
+        if by_last_name:
             callsign = callsign.capitalize()
         else:
             callsign = callsign.upper()
@@ -374,7 +376,9 @@ def main():
         load_db(args)
         return
 
-    results = lookup_callsigns(args)
+    results = lookup_callsigns(
+        args.database, args.callsigns, by_last_name=args.last_name
+    )
     for result in results:
         display_callsign(args, result)
 
