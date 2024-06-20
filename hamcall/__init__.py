@@ -142,8 +142,8 @@ def get_db(database):
     return sqlite3.connect(database)
 
 
-def create_db(args):
-    db = get_db(args.database)
+def create_db(database_path: str):
+    db = get_db(database_path)
 
     db.execute(
         """create table PUBACC_AM
@@ -268,14 +268,14 @@ def create_db(args):
       payment_cert_900        char(1)              null)""",
     )
 
-    info(f"created database tables in {args.database}")
+    info(f"created database tables in {database_path}")
 
     db.execute("create index am_callsign on PUBACC_AM (callsign)")
     db.execute("create index am_uls on PUBACC_AM (unique_system_identifier)")
     db.execute("create index en_uls on PUBACC_EN (unique_system_identifier)")
     db.execute("create index hd_uls on PUBACC_HD (unique_system_identifier)")
 
-    info(f"created database indexes in {args.database}")
+    info(f"created database indexes in {database_path}")
 
 
 def load_file_into_table(db, filename: str, table: str, columns: int):
@@ -289,9 +289,9 @@ def load_file_into_table(db, filename: str, table: str, columns: int):
     db.commit()
 
 
-def load_db(args):
-    db = get_db(args.database)
-    dir = Path(args.load)
+def load_db(database_path: str, from_directory: str):
+    db = get_db(database_path)
+    dir = Path(from_directory)
     load_file_into_table(db, dir.joinpath("AM.dat"), "AM", 18)
     load_file_into_table(db, dir.joinpath("EN.dat"), "EN", 30)
     load_file_into_table(db, dir.joinpath("HD.dat"), "HD", 59)
@@ -369,11 +369,11 @@ def main():
     args = parse_args()
 
     if args.init:
-        create_db(args)
+        create_db(args.database)
         return
 
     if args.load:
-        load_db(args)
+        load_db(args.database, args.load)
         return
 
     results = lookup_callsigns(
