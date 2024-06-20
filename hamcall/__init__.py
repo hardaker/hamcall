@@ -138,12 +138,12 @@ def parse_args() -> Namespace:
     return args
 
 
-def get_db(args):
-    return sqlite3.connect(args.database)
+def get_db(database):
+    return sqlite3.connect(database)
 
 
 def create_db(args):
-    db = get_db(args)
+    db = get_db(args.database)
 
     db.execute(
         """create table PUBACC_AM
@@ -290,7 +290,7 @@ def load_file_into_table(db, filename: str, table: str, columns: int):
 
 
 def load_db(args):
-    db = get_db(args)
+    db = get_db(args.database)
     dir = Path(args.load)
     load_file_into_table(db, dir.joinpath("AM.dat"), "AM", 18)
     load_file_into_table(db, dir.joinpath("EN.dat"), "EN", 30)
@@ -321,7 +321,7 @@ def display_callsign(args, result):
 
 
 def lookup_callsigns(args) -> list[dict]:
-    db = get_db(args)
+    db = get_db(args.database)
 
     search_expression = "select * from PUBACC_AM where callsign = ?"
     merge_tables = ["EN", "HD"]
