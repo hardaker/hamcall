@@ -320,7 +320,7 @@ def display_callsign(args, result):
             print(f"  {label:<20}: {result[field]}")
 
 
-def lookup_callsigns(args):
+def lookup_callsigns(args) -> list[dict]:
     db = get_db(args)
 
     search_expression = "select * from PUBACC_AM where callsign = ?"
@@ -360,8 +360,7 @@ def lookup_callsigns(args):
                 for additional in additionals:
                     result.update(additional)
 
-        for result in results:
-            display_callsign(args, result)
+    return results
 
 
 def main():
@@ -375,7 +374,9 @@ def main():
         load_db(args)
         return
 
-    lookup_callsigns(args)
+    results = lookup_callsigns(args)
+    for result in results:
+        display_callsign(args, result)
 
 
 if __name__ == "__main__":
