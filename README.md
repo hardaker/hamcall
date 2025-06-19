@@ -16,10 +16,11 @@ it only supports data from the US FCC ULS database, however.
 
 ## Loading the database
 
-Grab the weekly database snapshots from the [FCC Database] webpage,
-and unzip it into a DIRECTORY.  Then load the data:
+Grab the weekly amateur license database snapshots (not the
+application snapshot) from the [FCC Database] webpage, and unzip it
+into a DIRECTORY.  Then load the data from that directory:
 
-    $ hamcall -L DIRECTORY
+    $ Hamcall -L DIRECTORY
 
 ## Searching the database
 
