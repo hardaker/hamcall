@@ -43,6 +43,8 @@ default_fields = {
     "zip_code": "Zip code",
 }
 
+default_database = Path.home() / ".hamcall.sqlite3"
+
 
 def parse_args() -> Namespace:
     """Parse the command line arguments."""
@@ -55,9 +57,9 @@ def parse_args() -> Namespace:
     parser.add_argument(
         "-d",
         "--database",
-        default=Path.home() / ".hamcall.sqlite3",
+        default=default_database,
         type=str,
-        help="Where to store the database",
+        help=f"Where to store the database (default: {default_database})",
     )
 
     parser.add_argument(
@@ -65,6 +67,13 @@ def parse_args() -> Namespace:
         "--init",
         action="store_true",
         help="Create the database structure.",
+    )
+
+    parser.add_argument(
+        "-C",
+        "--clear",
+        action="store_true",
+        help="clear the existing database tables first (for starting from scratch).",
     )
 
     parser.add_argument(
@@ -140,6 +149,16 @@ def parse_args() -> Namespace:
 
 def get_db(database):
     return sqlite3.connect(database)
+
+
+def clear_db(database_path: str):
+    """Deletes / drops the tables from the existing database."""
+    db = get_db(database_path)
+    for table in ["PUBACC_AM", "PUBACC_EN", "PUBACC_HD"]:
+        db.execute("drop table " + table)
+
+    # for index in ["am_callsign", "am_uls", "en_uls", "hd_uls"]:
+    #     db.execute("drop index " + index)
 
 
 def create_db(database_path: str):
@@ -367,6 +386,9 @@ def lookup_callsigns(
 
 def main():
     args = parse_args()
+
+    if args.clear:
+        clear_db(args.database)
 
     if args.init:
         create_db(args.database)
