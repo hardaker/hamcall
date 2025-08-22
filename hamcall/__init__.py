@@ -7,7 +7,7 @@ from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser, Namespace
 from logging import debug, info
 from pathlib import Path
 
-__VERSION__ = "0.1.4"
+__VERSION__ = "0.1.5"
 
 # optionally use rich
 try:
